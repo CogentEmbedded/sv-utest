@@ -12,11 +12,11 @@ Project uses cmake tool to build an application.
 . /opt/poky/2.0.2/environment-setup-aarch64-poky-linux 
 mkdir build
 cd build
-cmake -DSV_TARGET_PLATFORM=H3 ../
+cmake -DSV_TARGET_PLATFORM=GEN3 ../
 make
 
 ```
-Optional values for SV_TARGET_PLATFORM are H3, H2
+Optional values for SV_TARGET_PLATFORM are GEN3, GEN2
 Prebuilt Surround View libraries are stored in libs subdirectory.
 
 ## Run
