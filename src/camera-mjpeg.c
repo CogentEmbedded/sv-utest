@@ -34,7 +34,6 @@
 #include <netinet/if_ether.h>
 #include <linux/ip.h>
 #include <linux/udp.h>
-#include <sv/svlib.h>
 #include <arpa/inet.h>
 #include "main.h"
 #include "common.h"
@@ -46,8 +45,8 @@
 
 TRACE_TAG(INIT, 1);
 TRACE_TAG(INFO, 1);
-TRACE_TAG(DEBUG, 0);
-TRACE_TAG(PROCESS, 0);
+TRACE_TAG(DEBUG, 1);
+TRACE_TAG(PROCESS, 1);
 
 /*******************************************************************************
  * Capturing configuration
@@ -146,6 +145,9 @@ static inline int camera_jpeg_parse(camera_data_t *camera, u16 ph, u64 ts, u8 *d
     GstBuffer  *buffer;
     u32         remaining;
     void       *input;
+
+    TRACE(DEBUG, _b("camera-%u: frame [ph=%X]: %u bytes"),
+	  camera->id, ph, length);
 
     /* ...frame must be over 2 bytes in size */
     CHK_ERR(length > 2, 0);

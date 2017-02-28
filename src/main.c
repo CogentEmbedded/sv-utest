@@ -612,6 +612,8 @@ static void print_usage()
             "\t        \t  where mac is in form AA:BB:CC:DD:EE:FF\n"
             "\t-v|--vin\t- V4L2 camera devices list: cam1,cam2,cam3,cam4\n"
             "\t        \t  where cam is in form /dev/videoX\n"
+	    "\t-j|--jpu\t- JPU jpeg decoder device \n"
+            "\t        \t  where device is in form /dev/videoX\n"
             "\t-c|--cfg\t- playback tracks configuration to load\n"
             "\t-o|--output\t- desired Weston display output number 0, 1,.., N\n"
             "\t-w|--js\t\t- joystick device name\n"

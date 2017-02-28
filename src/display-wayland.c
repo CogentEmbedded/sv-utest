@@ -2239,11 +2239,9 @@ static texture_data_t * texture_create_dma(vsink_meta_t* meta)
     texture_data_t         *texture;
     EGLImageKHR             image;
     EGLint                  attribs[MAX_ATTRIBUTES_COUNT];
-    EGLint                  grey_attribs[MAX_ATTRIBUTES_COUNT];
     EGLint                  error;
     int                     idx = 0;
     int                     egl_format = 0;
-    int                     grey_egl_format = DRM_FORMAT_R8;
 
     /* ...allocate texture data */
     texture = malloc(sizeof(*texture));
@@ -2335,30 +2333,6 @@ static texture_data_t * texture_create_dma(vsink_meta_t* meta)
         TRACE(ERROR, _x("eglCreateImageKHR failed: %d (%#x)"), error, error);
         goto error;
     }
-
-    /*   Create a copy of EGL Image
-
-         For interaction with OpenCL
-         we need a EGLimageKHR object which points to Y plane,
-         because OpenCL driver does not support creation of cl_mem objects
-         for multiplane images
-
-         The pointer to Y plane coincides with the one passed for texture->pdata
-    */
-    idx = 0;
-    grey_attribs[idx++] = EGL_WIDTH;
-    grey_attribs[idx++] = meta->width;
-    grey_attribs[idx++] = EGL_HEIGHT;
-    grey_attribs[idx++] = meta->height;
-    grey_attribs[idx++] = EGL_LINUX_DRM_FOURCC_EXT;
-    grey_attribs[idx++] = grey_egl_format;
-    grey_attribs[idx++] = EGL_DMA_BUF_PLANE0_FD_EXT;
-    grey_attribs[idx++] = meta->dmafd[0];
-    grey_attribs[idx++] = EGL_DMA_BUF_PLANE0_OFFSET_EXT;
-    grey_attribs[idx++] = meta->offsets[0];
-    grey_attribs[idx++] = EGL_DMA_BUF_PLANE0_PITCH_EXT;
-    grey_attribs[idx++] = meta->width;
-    grey_attribs[idx++] = EGL_NONE;
 
     /* ...allocate texture */
     glGenTextures(1, &texture->tex);

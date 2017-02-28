@@ -101,7 +101,6 @@ add_definitions(-DSV_VERSION_STRING="${GIT_HEAD_TAG}")
 
 add_definitions(
   -DOPENGL_ES
-  -DEGL_HAS_IMG_EXTERNAL_EXT
 )
 
 option(WITH_SPACENAV "Enable Spacenav 3D joystick" OFF)
@@ -202,6 +201,9 @@ if (SV_TARGET_PLATFORM STREQUAL GEN3)
   list(APPEND ${PROJECT_NAME}_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/mjpeg-decoder.c
     )
+  add_definitions(
+    -DEGL_HAS_IMG_EXTERNAL_EXT
+    )
 endif() 
 
 # Note: jpu-decoder and mjpeg-decode are mutually exclusive
@@ -209,6 +211,7 @@ if (SV_TARGET_PLATFORM STREQUAL GEN2)
   link_directories(${CMAKE_CURRENT_SOURCE_DIR}/libs/gen2)
   add_definitions(
     -DJPU_SUPPORT
+    -DEGL_HAS_IMG_EXTERNAL_EXT
     )
   list(APPEND ${PROJECT_NAME}_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/jpu.h

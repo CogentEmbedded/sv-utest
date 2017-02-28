@@ -37,8 +37,6 @@
 #include <linux/input.h>
 #include <sys/poll.h>
 
-#include <sv/svlib.h>
-
 #include "main.h"
 #include "vsink.h"
 #include "app.h"

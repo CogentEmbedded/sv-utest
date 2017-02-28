@@ -50,7 +50,7 @@ TRACE_TAG(DEBUG, 1);
  ******************************************************************************/
 
 /* ...maximal length of encoded JPEG frame */
-#define MJPEG_MAX_FRAME_LENGTH          (256 << 10)
+#define MJPEG_MAX_FRAME_LENGTH          (512 << 10)
 
 /* ...number of input buffers per each camera */
 #define MJPEG_INPUT_POOL_SIZE           4

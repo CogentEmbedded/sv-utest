@@ -286,10 +286,13 @@ static GstFlowReturn gst_vsink_buffer_pool_alloc_buffer(GstBufferPool *_pool,
     vmeta->width = meta->width;
     vmeta->height = meta->height;
     vmeta->format = meta->format;
+
     vmeta->plane[0] = info.data;
 
     /* ...avoid detaching of metadata when buffer is returned to a pool */
     GST_META_FLAG_SET(vmeta, GST_META_FLAG_POOLED);
+
+    TRACE(BUFFER, _b("buffer [%p] width=%d, height=%d, format=%d"), buf, meta->width, meta->height, vmeta->format);
 
     /* ...notify caller */
     (pool->alloc ? pool->alloc(buf, pool->cdata) : 0);
@@ -298,7 +301,7 @@ static GstFlowReturn gst_vsink_buffer_pool_alloc_buffer(GstBufferPool *_pool,
     gst_memory_unmap(mem, &info);
     gst_memory_unref(mem);
 
-    TRACE(BUFFER, _b("buffer allocated [%p], refcount=%d"), buf, GST_MINI_OBJECT_REFCOUNT(buf));
+    TRACE(BUFFER, _b("buffer allocated [%p], refcount=%d, format=%d"), buf, GST_MINI_OBJECT_REFCOUNT(buf), meta->format);
 
     return GST_FLOW_OK;
 }

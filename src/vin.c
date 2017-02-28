@@ -35,8 +35,6 @@
 #include <sys/poll.h>
 #include <linux/videodev2.h>
 
-#include <sv/svlib.h>
-
 #include "main.h"
 #include "common.h"
 #include "camera.h"

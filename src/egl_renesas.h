@@ -34,19 +34,20 @@
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
+
 #define EGL_NATIVE_PIXFORMAT_NV12 (EGL_NATIVE_PIXFORMAT_NV12_REL)
 /* NV16 is not supported on some boards */
 #if defined (EGL_NATIVE_PIXFORMAT_NV16_REL)
 #define EGL_NATIVE_PIXFORMAT_NV16 (EGL_NATIVE_PIXFORMAT_NV16_REL)
 #else
-#define EGL_NATIVE_PIXFORMAT_NV16 (-1)
+#define EGL_NATIVE_PIXFORMAT_NV16 (12)
 #endif
 #define EGL_NATIVE_PIXFORMAT_UYVY (EGL_NATIVE_PIXFORMAT_UYVY_REL)
 
 #if defined (EGL_NATIVE_PIXFORMAT_I420_REL)
 #define EGL_NATIVE_PIXFORMAT_I420 (EGL_NATIVE_PIXFORMAT_I420_REL)
 #else
-#define EGL_NATIVE_PIXFORMAT_I420 (-1)
+#define EGL_NATIVE_PIXFORMAT_I420 (10)
 #endif
 
 #if defined (EGL_NATIVE_PIXFORMAT_R8_REL)

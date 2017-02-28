@@ -40,8 +40,6 @@
 
 #include <pcap/pcap.h>
 
-#include <sv/svlib.h>
-
 #include "main.h"
 #include "common.h"
 #include "camera.h"
@@ -53,7 +51,7 @@
 
 TRACE_TAG(INIT, 1);
 TRACE_TAG(INFO, 1);
-TRACE_TAG(DEBUG, 0);
+TRACE_TAG(DEBUG, 1);
 
 /*******************************************************************************
  * Local types definitions

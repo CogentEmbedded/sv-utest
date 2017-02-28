@@ -30,8 +30,6 @@
  * Includes
  ******************************************************************************/
 
-#include <sv/svlib.h>
-
 #include "camera.h"
 #include "common.h"
 #include "display.h"
