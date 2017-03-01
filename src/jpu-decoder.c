@@ -919,7 +919,7 @@ GstElement * camera_mjpeg_create(const camera_callback_t *cb, void *cdata, int n
     pthread_cond_init(&dec->flush_wait, NULL);
 
     /* ...initialize decoder runtime (image size hardcoded for now - tbd) */
-    if ((errno = -mjpeg_runtime_init(dec, 1280, 800)) != 0)
+    if ((errno = -mjpeg_runtime_init(dec, width, height)) != 0)
     {
         TRACE(ERROR, _x("failed to initialize decoder runtime: %m"));
         goto error_bin;
