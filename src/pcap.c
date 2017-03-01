@@ -80,6 +80,8 @@ typedef struct netif_pcap_data
  * Packet parser
  ******************************************************************************/
 
+extern u16 __proto;
+
 /* ...get current timestamp value */
 static inline u64 net_offline_wait(struct timeval *tv, s64 *diff)
 {
