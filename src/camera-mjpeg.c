@@ -135,6 +135,17 @@ typedef struct camera_data
 #define CAMERA_EVENT_MASK               (0xF << 4)
 
 /*******************************************************************************
+ *  Network filter/jpeg parsing settings
+ ******************************************************************************/
+
+/* ...Ethernet type, default 0x88B5 */
+u16                         __proto = ETH_TYPE_AVBTP;
+
+/* ...PDU sub type, default 0x2 */
+u8                          __subtype = 0x2;
+
+
+/*******************************************************************************
  * JPEG stream parsing (SOI/EOI only)
  ******************************************************************************/
 
@@ -298,7 +309,7 @@ static inline int camera_pdu_rx(camera_data_t *camera, u8 *pdu, u16 length, u64 
     u16     ph = pdu_get_protocol_header(pdu);
 
     /* ...make sure packet is of proper format */
-    CHK_ERR(pdu_get_subtype(pdu) == 0x2, -EPROTO);
+    CHK_ERR(pdu_get_subtype(pdu) == __subtype, -EPROTO);
 
     /* ...check data-length is sane */
     CHK_ERR(length >= datalen + NETIF_HEADER_LENGTH, -EPROTO);
@@ -379,7 +390,7 @@ static gboolean camera_appsrc_read_data(void *arg)
         /* ...get protocol id */
         proto = nbuf_eth_translate(nbuf, &length);
 
-        if (proto != 0x88B5)
+        if (proto != __proto)
         {
             TRACE(ERROR, _x("unrecognized proto: %04X"), proto);
             goto release;
@@ -524,7 +535,7 @@ camera_data_t * __camera_mjpeg_create(netif_data_t *netif,
         int id, u8 *da, u8 *sa, u16 vlan,
         GstBuffer * (*get_buffer)(void *, int), void *cdata)
 {
-    netif_filter_t  filter = { .da = da, .sa = sa, .proto = 0x88b5, .vlan = vlan };
+    netif_filter_t  filter = { .da = da, .sa = sa, .proto = __proto, .vlan = vlan };
     camera_data_t  *camera;
     char            name[32];
 

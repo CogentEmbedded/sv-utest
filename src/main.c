@@ -323,6 +323,9 @@ static GstElement * __camera_vin_create(const camera_callback_t *cb,
  * Parameters parsing
  ******************************************************************************/
 
+extern u16                         __proto;
+extern u8                          __subtype;
+
 static inline void vin_addresses_to_name(char* str[CAMERAS_NUMBER],
                                          char *vin[CAMERAS_NUMBER])
 {
@@ -552,7 +555,9 @@ enum surround_view_options
     OPT_INTRINSICS_GRAB_INTERVAL,
     OPT_INTRINSICS_NUM_FRAMES,
     OPT_EXTRINSICS_NUM_CIRCLES,
-    OPT_EXTRINSICS_CIRCLES_PARAM    
+    OPT_EXTRINSICS_CIRCLES_PARAM,
+    OPT_PROTO,
+    OPT_PDU_SUBTYPE
 };
 
 /* ...command-line options */
@@ -598,6 +603,10 @@ static const struct option    options[] = {
     {   "extrinsics-num-circles",  required_argument,  NULL, OPT_EXTRINSICS_NUM_CIRCLES },    
     {   "extrinsics-circles-param",  required_argument,  NULL, OPT_EXTRINSICS_CIRCLES_PARAM },
 
+    /* Network filter settings/stream parser settings */
+    {   "proto",  required_argument,  NULL, OPT_PROTO },
+    {   "pdu-subtype",  required_argument,  NULL, OPT_PDU_SUBTYPE },
+
     {   NULL,               0,                  NULL, 0 },
 };
 
@@ -608,6 +617,8 @@ static void print_usage()
             "\t-d|--debug\t- set debug level 0-6\n"
 	    "\t-f|--format\t- video format, must be first in command line (available options: uyvy, nv12,i420)\n"
             "\t-i|--iface\t- for MJPEG cameras only, network interface\n"
+            "\t--proto\t- for MJPEG cameras only, ethernet type, default 0x88B5\n"
+	    "\t--pdu-subtype\t- for MJPEG cameras only, pdu subtype, default 0x2\n"
             "\t-m|--mac\t- for MJPEG cameras only, cameras MAC list: mac1,mac2,mac3,mac4\n"
             "\t        \t  where mac is in form AA:BB:CC:DD:EE:FF\n"
             "\t-v|--vin\t- V4L2 camera devices list: cam1,cam2,cam3,cam4\n"
@@ -847,7 +858,15 @@ static int parse_cmdline(int argc, char **argv)
 	case OPT_EXTRINSICS_NUM_CIRCLES:
             cfg->pattern_num_circles = atoi(optarg);
 	    TRACE(INIT, _b("Extrinsics calibration: number of circles: %d"), cfg->calib_boards_required);
-	    break;	    
+	    break;
+    	case OPT_PROTO:
+            __proto = strtoul(optarg, NULL, 0);
+	    TRACE(INIT, _b("MJPEG camera settings: ethernet type: 0x%x"), __proto);
+	    break;
+      	case OPT_PDU_SUBTYPE:
+            __subtype = strtoul(optarg, NULL, 0);
+	    TRACE(INIT, _b("MJPEG camera settings: pdu subtype: 0x%x"), __subtype);
+	    break;
         default:
         return -EINVAL;
         }
