@@ -514,6 +514,8 @@ static inline u64 net_offline_wait(u64 ts, u64 *diff)
     return t0;
 }
 
+extern u16 __proto;
+
 /* ...process ethernet frame */
 static inline void __netif_blf_ethernet(netif_blf_data_t *blf, blf_hdr_v1_t *hdr, u8 *data, u64 *diff)
 {
@@ -544,7 +546,7 @@ static inline void __netif_blf_ethernet(netif_blf_data_t *blf, blf_hdr_v1_t *hdr
         if (memcmp(data, camera_mac_address[i], 6))   continue;
 
         /* ...verify packet protocol */
-        if (*(u16 *)(data + 16) != 0x88B5)  continue;
+        if (*(u16 *)(data + 16) != __proto)  continue;
 
         TRACE(DEBUG, _b("packet-%d: %p[%u]"), i, data + 24, *(u16 *)(data + 22));
 

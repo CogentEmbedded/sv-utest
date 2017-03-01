@@ -142,7 +142,7 @@ static void * pcap_replay_thread(void *arg)
 
         TRACE(0, _b("packet: %p[%lu.%lu] proto: %x"), pdata, pkthdr.ts.tv_sec, pkthdr.ts.tv_sec, proto);
 
-        if (proto == 0x8100 || proto == 0x88B5)
+        if (proto == 0x8100 || proto == __proto)
         {
             /* ...compare source address */
             for (i = 0; i < CAMERAS_NUMBER; i++)
@@ -157,7 +157,7 @@ static void * pcap_replay_thread(void *arg)
                     (proto == 0x8100 ? proto = netif_get_u16(pdata + 16), pdu += 4, len -= 4 : 0);
 
                     /* ...check packet type is expected */
-                    if (proto != 0x88B5)
+                    if (proto != __proto)
                     {
                         break;
                     }
