@@ -372,6 +372,7 @@ find_v4l2_for_media_device(gchar* media_name, gchar* entity_name_regex)
     gchar* devname = NULL;
     int ret;
     struct media_device *media = NULL;
+    int i;
 
     GRegex *regex = g_regex_new(entity_name_regex, G_REGEX_CASELESS, G_REGEX_MATCH_NOTEMPTY, NULL);
     if (!regex)
@@ -392,7 +393,7 @@ find_v4l2_for_media_device(gchar* media_name, gchar* entity_name_regex)
         goto out;
     }
 
-    for (int i = 0; i < media_get_entities_count(media); i++)
+    for (i = 0; i < media_get_entities_count(media); i++)
     {
         struct media_entity *entity = media_get_entity(media, i);
         const struct media_entity_desc *desc = media_entity_get_info(entity);
