@@ -31,6 +31,9 @@
 
 #include <getopt.h>
 
+#include <fcntl.h>
+#include <sys/ioctl.h>
+
 #include "main.h"
 #include "common.h"
 #include "app.h"
@@ -74,6 +77,15 @@ static char            *iface = NULL;
 
 /* ...live source processing */
 static int              __live_source;
+
+/* ...Streaming ip */
+char                *__stream_ip = NULL;
+
+/* ...Streaming filename */
+char                *__stream_file = NULL;
+
+/* ...Streaming base port */
+int                 __stream_base_port = 0;
 
 /* ...global configuration data */
 static sview_cfg_t      __sv_cfg =
@@ -316,7 +328,7 @@ static GstElement * __camera_vin_create(const camera_callback_t *cb,
                                         int width,
                                         int height)
 {
-    return camera_vin_create(cb, cdata, vin_devices, n, width, height);
+    return camera_vin_create(cb, cdata, __sv_cfg.vfd, n, width, height);
 }
 
 /*******************************************************************************
@@ -363,6 +375,26 @@ static inline int parse_vin_devices(char *str, char **name, int n)
 
     /* ...make sure we have parsed all addresses */
     CHK_ERR(n == 0, -EINVAL);
+
+    return 0;
+}
+
+static inline int open_vin_descriptors(sview_cfg_t* cfg, char **name)
+{
+    int i;
+#if defined STREAM_5TH_CAM
+    for(i = 0; i < CAMERAS_NUMBER - 1; i++)
+#else
+    for(i = 0; i < CAMERAS_NUMBER; i++)
+#endif
+    {
+        cfg->vfd[i] = open(name[i], O_RDWR, O_NONBLOCK);
+
+        if (cfg->vfd[i] == -1)
+        {
+            return -1;
+        }
+    }
 
     return 0;
 }
@@ -557,7 +589,10 @@ enum surround_view_options
     OPT_EXTRINSICS_NUM_CIRCLES,
     OPT_EXTRINSICS_CIRCLES_PARAM,
     OPT_PROTO,
-    OPT_PDU_SUBTYPE
+    OPT_PDU_SUBTYPE,
+    OPT_STREAMING_IP = 'I',
+    OPT_STREAMING_PORT = 'P',
+    OPT_RECORDING_FILENAME = 'F'
 };
 
 /* ...command-line options */
@@ -607,6 +642,11 @@ static const struct option    options[] = {
     {   "proto",  required_argument,  NULL, OPT_PROTO },
     {   "pdu-subtype",  required_argument,  NULL, OPT_PDU_SUBTYPE },
 
+    /* ...streaming options */
+    {   "streaming-ip",           required_argument,  NULL, OPT_STREAMING_IP },
+    {   "streaming-port",         required_argument,  NULL, OPT_STREAMING_PORT },
+    {   "recording-filename",     required_argument,  NULL, OPT_RECORDING_FILENAME },
+
     {   NULL,               0,                  NULL, 0 },
 };
 
@@ -633,6 +673,10 @@ static void print_usage()
             "\t--view\t\t- orientation of window 0 - portrait, 1 - landscape\n"
             "\t--resolution\t- window size as WidthxHeight\n"
             "\t--camres\t- camera output size as WIDTHxHEIGHT\n"
+            "\nStreaming options:\n"
+            "\t--streaming-ip\t - host IP to stream\n"
+            "\t--streaming-port\t - host base port to stream\n"
+            "\t--recording-filename\t - name of mkv file to record video\n"
             "\nAuxiliary calibration options:\n"
             "\t--intrinsicframes <mask1>,<mask2>,<mask3>,<mask4> - specify comma-separated\n"
             "\t         list of file masks which can be loaded in calibration UI\n"
@@ -735,6 +779,7 @@ static int parse_cmdline(int argc, char **argv)
             TRACE(INIT, _b("VIN devices: '%s'"), optarg);
             CHK_API(parse_vin_devices(optarg, vin_devices, CAMERAS_NUMBER));
             vin_addresses_to_name(cfg->cam_names, vin_devices);
+            CHK_API(open_vin_descriptors(cfg, vin_devices));
             vin = 1;
             break;
 	case OPT_FORMAT:
@@ -867,6 +912,20 @@ static int parse_cmdline(int argc, char **argv)
             __subtype = strtoul(optarg, NULL, 0);
 	    TRACE(INIT, _b("MJPEG camera settings: pdu subtype: 0x%x"), __subtype);
 	    break;
+        case OPT_STREAMING_IP:
+            TRACE (INIT, _b ("Stream host IP: %s"), optarg);
+            __stream_ip = optarg;
+            break;
+
+        case OPT_STREAMING_PORT:
+            TRACE (INIT, _b ("Stream host base port: %d"), atoi(optarg));
+            __stream_base_port = atoi(optarg);
+            break;
+
+        case OPT_RECORDING_FILENAME:
+            TRACE (INIT, _b ("Recording filename: %s"), optarg);
+            __stream_file = optarg;
+            break;
         default:
         return -EINVAL;
         }

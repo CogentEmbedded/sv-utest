@@ -47,6 +47,23 @@ typedef struct track_list   track_list_t;
 /*******************************************************************************
  * Local types definitions
  ******************************************************************************/
+enum streaming_pipeline_state
+{
+    DISABLED = 0,
+    STREAMING = 1,
+    RECORDING = 2,
+    COMBINED = 3
+};
+
+
+/* ...Streaming ip */
+extern char                *__stream_ip;
+
+/* ...Streaming filename */
+extern char                *__stream_file;
+
+/* ...Streaming base port */
+extern int                 __stream_base_port;
 
 /*******************************************************************************
  * Types definitions
@@ -81,6 +98,29 @@ struct app_data
 
     /* ...pending output buffers (surround-view and frontal camera) */
     GQueue              render[CAMERAS_NUMBER + 1];
+    /* ...Streamer pipelines */
+    GstPipeline         *stream_pipeline;
+
+    /* ...appsrc instances of streaming pipeline */
+    GstAppSrc           *stream_appsrc[CAMERAS_NUMBER];
+
+    /* ...States of stream pipeline */
+    int                 stream_state;
+
+    /* ...Streaming ip */
+    char                *stream_ip;
+
+    /* ...Streaming filename */
+    char                *stream_file;
+
+    /* ...Streaming base port */
+    int                 stream_base_port;
+
+    /* ...Streaming frame count limit */
+    int                 stream_frame_count;
+
+    /* ...stream control thread */
+    pthread_t           stream_control;
 
     /* ...mask of available frames (for surround view) */
     u32                 frames;
@@ -272,6 +312,20 @@ extern void gui_config_update(widget_data_t *widget);
  ******************************************************************************/
 
 extern int app_has_multiple_sources(app_data_t *app);
+
+/*******************************************************************************
+ * Streaming control
+ ******************************************************************************/
+
+/* Create stream pipeline control thread */
+extern int stream_pipeline_control_start(app_data_t *app);
+
+/* Push buffer in stream pipeline */
+extern int stream_pipeline_push_buffer(app_data_t *app, int i, GstPipeline* pipeline, GstBuffer* buffer);
+
+/* Stop streaming if it's running */
+extern int stream_pipeline_destroy(app_data_t *app);
+
 
 /* ...surround-view scene show flag */
 #define APP_FLAG_SVIEW                  (1 << 0)

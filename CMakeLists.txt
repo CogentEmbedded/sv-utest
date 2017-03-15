@@ -155,6 +155,8 @@ set(
     mmngr
     mmngrbuf
     m
+    rt
+    mediactl-v4l2
 )
 
 if (SPNAV_FOUND)
@@ -186,6 +188,7 @@ set(
     ${CMAKE_CURRENT_SOURCE_DIR}/src/vpool.c
     ${CMAKE_CURRENT_SOURCE_DIR}/src/vsink.c
     ${CMAKE_CURRENT_SOURCE_DIR}/src/vsink.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/stream.c
     )
 
 list(APPEND ${PROJECT_NAME}_SOURCES

@@ -88,7 +88,7 @@ extern GstElement * video_stream_create(const camera_callback_t *cb,
 
 extern GstElement * camera_vin_create(const camera_callback_t *cb,
                                       void *cdata,
-                                      char **devname,
+                                      int *vfd,
                                       int n,
                                       int width,
                                       int height);

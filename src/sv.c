@@ -306,6 +306,17 @@ static int sview_input_process(void *data, int i, GstBuffer *buffer)
 #endif
         }
 
+        /* ...place buffer into streamer renderer queue (take ownership) */
+        if (app->stream_state != DISABLED)
+        {
+            gst_buffer_ref(buffer);
+            if (stream_pipeline_push_buffer(app, i, app->stream_pipeline, buffer))
+            {
+                gst_buffer_unref(buffer);
+                TRACE(ERROR, _b("camera-%d: failed to push buffer in streamer"), i);
+            }
+        }
+
         /* ...place buffer into main rendering queue (take ownership) */
         g_queue_push_tail(&app->render[i], buffer);
         gst_buffer_ref(buffer);
@@ -886,6 +897,8 @@ void * app_thread(void *arg)
         /* ...start a selected track (ignore error) */
         app_track_start(app, track, 1);
 
+        stream_pipeline_control_start(app);
+
         /* ...release internal data access lock */
         pthread_mutex_unlock(&app->lock);
 
@@ -907,6 +920,8 @@ void * app_thread(void *arg)
         window_schedule_redraw(app->window);
 
         TRACE(INFO, _b("track '%s' completed"), (track->info ? : "default"));
+
+        stream_pipeline_destroy(app);
 
         /* ...release internal lock to allow termination sequence to complete */
         pthread_mutex_unlock(&app->lock);

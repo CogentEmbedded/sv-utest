@@ -625,23 +625,22 @@ static gboolean __output_buffer_dispose(GstMiniObject *obj)
 
 /* ...runtime initialization */
 static inline int vin_runtime_init(vin_decoder_t *dec,
-        char **devname, int n, int width, int height, u32 format)
+        int *vfd, int n, int width, int height, u32 format)
 {
     int     i, j;
 
     for (i = 0; i < n; i++)
     {
         vin_device_t   *dev = dec->dev + i;
-        int             vfd;
 
         /* ...open associated VIN device */
-        CHK_API(dev->vfd = vfd = open(devname[i], O_RDWR, O_NONBLOCK));
+        CHK_API(dev->vfd = vfd[i]);
 
         /* ...set VIN format (image parameters are hardcoded - tbd) */
-        CHK_API(vin_set_formats(vfd, width, height, format));
+        CHK_API(vin_set_formats(dev->vfd, width, height, format));
 
         /* ...allocate output buffers */
-        CHK_API(vin_allocate_buffers(vfd, dev->pool, VIN_BUFFER_POOL_SIZE));
+        CHK_API(vin_allocate_buffers(dev->vfd, dev->pool, VIN_BUFFER_POOL_SIZE));
 
         /* ...create gstreamer buffers */
         for (j = 0; j < VIN_BUFFER_POOL_SIZE; j++)
@@ -651,8 +650,14 @@ static inline int vin_runtime_init(vin_decoder_t *dec,
             vin_meta_t     *meta;
             vsink_meta_t   *vmeta;
 
-            /* ...allocate empty GStreamer buffer */
-            CHK_ERR(buf->buffer = buffer = gst_buffer_new(), -ENOMEM);
+            /* ...allocate GStreamer buffer */
+            CHK_ERR(buf->buffer = buffer = gst_buffer_new_wrapped_full(GST_MEMORY_FLAG_PHYSICALLY_CONTIGUOUS,
+                                                                       buf->data,
+                                                                       buf->length * 2,
+                                                                       0,
+                                                                       buf->length,
+                                                                       NULL,
+                                                                       NULL), -ENOMEM);
             TRACE(BUFFER, _b("new buffer: %p, refcount=%d, format=%s"), buffer, GST_MINI_OBJECT_REFCOUNT(buffer), gst_video_format_to_string (__pixfmt_v4l2_to_gst(format)));
             /* ...add VIN metadata for decoding purposes */
             CHK_ERR(meta = gst_buffer_add_vin_meta(buffer), -ENOMEM);
@@ -819,7 +824,7 @@ static void vin_decoder_destroy(gpointer data, GObject *obj)
 /* ...create camera bin interface */
 GstElement * camera_vin_create(const camera_callback_t *cb,
                                void *cdata,
-                               char **devname,
+                               int *vfd,
                                int n,
                                int width,
                                int height)
@@ -870,7 +875,7 @@ GstElement * camera_vin_create(const camera_callback_t *cb,
 
     /* ...initialize decoder runtime (image size hardcoded for now - tbd) */
     if ((errno = -vin_runtime_init(dec,
-                                   devname,
+                                   vfd,
                                    n,
                                    width,
                                    height,
